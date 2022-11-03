@@ -34,9 +34,14 @@ class App extends Component<{}, IState> {
   /**
    * Render Graph react component with state.data parse as property data
    */
-  renderGraph() {
+/**
+ * Render Graph react component with state.data parse as property data
+ */
+renderGraph() {
+  if (this.state.showGraph){
     return (<Graph data={this.state.data}/>)
   }
+}
 
   /**
    * Get new data from server and update the state with the new data
