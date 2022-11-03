@@ -18,9 +18,14 @@ interface IProps {
  * Perspective library adds load to HTMLElement prototype.
  * This interface acts as a wrapper for Typescript compiler.
  */
+/**
+ * Perspective library adds load to HTMLElement prototype.
+ * This interface acts as a wrapper for Typescript compiler.
+ */
 interface PerspectiveViewerElement extends HTMLElement{
   load: (table: Table) => void,
 }
+
 
 /**
  * React component that renders Perspective based on data
@@ -38,41 +43,32 @@ class Graph extends Component<IProps, {}> {
     return React.createElement('perspective-viewer');
   }
 
- componentDidMount() {
-  // Get element from the DOM.
-  const elem = document.getElementsByTagName('perspective-viewer')[0] as unknown as PerspectiveViewerElement;
+  componentDidMount() {
+    // Get element to attach the table from the DOM.
+    // the componentDidMount() method runs
+    // after the component output has been rendered to the DOM.
+    const elem = document.getElementsByTagName('perspective-viewer')[0] as unknown as PerspectiveViewerElement;
+    const schema = {
+      stock: 'string',
+      top_ask_price: 'float',
+      top_bid_price: 'float',
+      timestamp: 'date',
+    };
 
-  const schema = {
-    price_abc: 'float',
-    price_def: 'float',
-    ratio: 'float',
-    timestamp: 'date',
-    upper_bound: 'float',
-    lower_bound: 'float',
-    trigger_alert: 'float',
-  };
-
-  if (window.perspective && window.perspective.worker()) {
-    this.table = window.perspective.worker().table(schema);
+    if (window.perspective && window.perspective.worker()) {
+      this.table = window.perspective.worker().table(schema);
+    }
+    if (this.table) {
+      // Load the `table` in the `<perspective-viewer>` DOM reference.
+      // Add more Perspective configurations here.
+      elem.load(this.table);
+      elem.setAttribute('view','y_line');
+      elem.setAttribute('column-pivots','["stock"]');
+      elem.setAttribute('row-pivots','["timestamp"]');
+      elem.setAttribute('columns','["top_ask_price"]');
+      elem.setAttribute('aggregates', `{"stock":"distinct count","top_ask_price":"avg","top_bid_price":"avg","timestamp":"distinct count"}`);
+    }
   }
-  if (this.table) {
-    // Load the `table` in the `<perspective-viewer>` DOM reference.
-    elem.load(this.table);
-    elem.setAttribute('view', 'y_line');
-    elem.setAttribute('row-pivots', '["timestamp"]');
-    elem.setAttribute('columns', '["top_ask_price"]');
-    elem.setAttribute('aggregates', JSON.stringify({
-    // To configure our graph, modify/add more attributes to the element. 
-      price_abc: 'avg',
-      price_def: 'avg',
-      ratio: 'avg',
-      timestamp: 'distinct count',
-      upper_bound: 'avg',
-      lower_bound: 'avg',
-      trigger_alert: 'avg',
-    }));
-  }
-}
 
    componentDidUpdate() {
     if (this.table) {
